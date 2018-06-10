@@ -10,7 +10,14 @@ import SpriteKit
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
+    var wynik = 0
+    let wynikCzcionka = SKLabelNode(fontNamed: "The Bold Font")
     let gracz = SKSpriteNode(imageNamed: "Spaceship")
+    
+    var liczbaZyc = 3
+    let zyciaCzcionka = SKLabelNode(fontNamed: "The Bold Font")
+    
+    var jakiPoziom = 0;
     
     let dzwiekPocisku = SKAction.playSoundFileNamed("Laser Blaster-SoundBible.com-1388608841.mp3", waitForCompletion: false)
     
@@ -64,8 +71,43 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         gracz.physicsBody!.contactTestBitMask = PhysicsCategories.Przeciwnik
         
         self.addChild(gracz) // dodajemy
+        wynikCzcionka.text = "Wynik: 0"
+        wynikCzcionka.fontSize = 70
+        wynikCzcionka.fontColor = SKColor.whiteColor()
+        wynikCzcionka.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Left
+        wynikCzcionka.position = CGPoint(x: self.size.width*0.15, y: self.size.height*0.9)
+        wynikCzcionka.zPosition = 100
+        self.addChild(wynikCzcionka)
+        
+        zyciaCzcionka.text = "Zycia: 3"
+        zyciaCzcionka.fontSize = 70
+        zyciaCzcionka.fontColor = SKColor.whiteColor()
+        zyciaCzcionka.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Right
+        zyciaCzcionka.position = CGPoint(x: self.size.width*0.85, y: self.size.height*0.9)
+        zyciaCzcionka.zPosition = 100
+        self.addChild(zyciaCzcionka)
         
         stworzNowyPoziom()
+    }
+    
+    func stracZycie() {
+        liczbaZyc -= 1
+        zyciaCzcionka.text = "Zycia: \(liczbaZyc)"
+        
+        let skalaGorna = SKAction.scaleTo(1.5, duration: 0.2)
+        let skalaDolna = SKAction.scaleTo(1, duration: 0.2)
+        let skalaSekwencja = SKAction.sequence([skalaGorna, skalaDolna])
+        zyciaCzcionka.runAction(skalaSekwencja)
+        
+    }
+    
+    func dodajWynik() {
+        wynik += 1
+        wynikCzcionka.text = "Wynik: \(wynik)"
+        if wynik == 10 || wynik == 25 || wynik == 50 {
+            stworzNowyPoziom()
+        }
+        
     }
     
     func didBeginContact(contact: SKPhysicsContact) {
@@ -92,6 +134,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         if cialo1.categoryBitMask == PhysicsCategories.Pocisk && cialo2.categoryBitMask == PhysicsCategories.Przeciwnik && cialo2.node?.position.y < self.size.height {
+            
+            dodajWynik()
             if cialo2.node != nil {
             stworzEksplozje(cialo2.node!.position)
             }
@@ -120,11 +164,28 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     
     func stworzNowyPoziom() {
+        jakiPoziom += 1
+        
+        if self.actionForKey("tworzeniePrzeciwnikow") != nil {
+            self.removeActionForKey("tworzeniePrzeciwnikow")
+        }
+        
+        var poziomCzas = NSTimeInterval()
+        
+        switch jakiPoziom {
+        case 1: poziomCzas = 1.2
+        case 2: poziomCzas = 1
+        case 3: poziomCzas = 0.8
+        case 4: poziomCzas = 0.5
+        default:
+            poziomCzas = 0.5
+        }
+        
         let stworz = SKAction.runBlock(stworzPrzeciwnika)
-        let czekajNaPrzeciwnika = SKAction.waitForDuration(1)
-        let stworzSekwencja = SKAction.sequence([stworz, czekajNaPrzeciwnika])
+        let czekajNaPrzeciwnika = SKAction.waitForDuration(poziomCzas)
+        let stworzSekwencja = SKAction.sequence([czekajNaPrzeciwnika, stworz])
         let stworzNaZawsze = SKAction.repeatActionForever(stworzSekwencja)
-        self.runAction(stworzNaZawsze)
+        self.runAction(stworzNaZawsze, withKey: "tworzeniePrzeciwnikow")
         
     }
     
@@ -168,7 +229,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         let ruszPrzeciwnika = SKAction.moveTo(punktKoncowy, duration: 1.5)
         let usunPrzeciwnika = SKAction.removeFromParent()
-        let przeciwnikSekwencja = SKAction.sequence([ruszPrzeciwnika, usunPrzeciwnika])
+        let stracZycieAkcja = SKAction.runBlock(stracZycie)
+        
+        let przeciwnikSekwencja = SKAction.sequence([ruszPrzeciwnika, usunPrzeciwnika, stracZycieAkcja])
         przeciwnik.runAction(przeciwnikSekwencja)
         
         let dx = punktKoncowy.x - punktStartowy.x
