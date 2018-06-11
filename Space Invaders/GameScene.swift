@@ -8,9 +8,11 @@
 
 import SpriteKit
 
-class GameScene: SKScene, SKPhysicsContactDelegate {
+var wynik = 0
+
+class GameScene: SKScene, SKPhysicsContactDelegate{
     
-    var wynik = 0
+    
     let wynikCzcionka = SKLabelNode(fontNamed: "The Bold Font")
     let gracz = SKSpriteNode(imageNamed: "Spaceship")
     
@@ -22,6 +24,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let dzwiekPocisku = SKAction.playSoundFileNamed("Laser Blaster-SoundBible.com-1388608841.mp3", waitForCompletion: false)
     
     let dzwiekEksplozji = SKAction.playSoundFileNamed("Bomb Explosion 1-SoundBible.com-980698079.wav", waitForCompletion: false)
+    
+    enum stanGry {
+        case przedStartem
+        case wTrakcie
+        case poGrze
+    }
+    
+    var obecnyStanGry = stanGry.wTrakcie
+    
     struct PhysicsCategories {
         static let Nic: UInt32 = 0
         static let Gracz: UInt32 = 0b1 //1
@@ -53,6 +64,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func didMoveToView(view: SKView) { // po odpaleniu apki  ta metoda od razu sie wykonuje
+        wynik = 0
         self.physicsWorld.contactDelegate = self
         let tlo = SKSpriteNode(imageNamed: "background")
         tlo.size = self.size
@@ -99,6 +111,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let skalaSekwencja = SKAction.sequence([skalaGorna, skalaDolna])
         zyciaCzcionka.runAction(skalaSekwencja)
         
+        if liczbaZyc == 0 {
+            koniecGry()
+        }
+        
     }
     
     func dodajWynik() {
@@ -131,6 +147,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
             cialo1.node?.removeFromParent()
             cialo2.node?.removeFromParent()
+            
+            koniecGry()
         }
         
         if cialo1.categoryBitMask == PhysicsCategories.Pocisk && cialo2.categoryBitMask == PhysicsCategories.Przeciwnik && cialo2.node?.position.y < self.size.height {
@@ -192,6 +210,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func wystrzelPocisk() {
         
         let pocisk = SKSpriteNode(imageNamed: "bullet")
+        pocisk.name = "Pocisk"
         pocisk.setScale(1)
         pocisk.position = gracz.position
         pocisk.zPosition = 1
@@ -217,6 +236,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let punktKoncowy = CGPoint(x: losowyXKoniec, y: -self.size.height * 0.2)
         
         let przeciwnik = SKSpriteNode(imageNamed: "enemyShip")
+        przeciwnik.name = "Przeciwnik"
         przeciwnik.setScale(1)
         przeciwnik.position = punktStartowy
         przeciwnik.zPosition = 2
@@ -227,12 +247,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         przeciwnik.physicsBody!.contactTestBitMask = PhysicsCategories.Gracz | PhysicsCategories.Pocisk
         self.addChild(przeciwnik)
         
-        let ruszPrzeciwnika = SKAction.moveTo(punktKoncowy, duration: 1.5)
+        let ruszPrzeciwnika = SKAction.moveTo(punktKoncowy, duration: 3)
         let usunPrzeciwnika = SKAction.removeFromParent()
         let stracZycieAkcja = SKAction.runBlock(stracZycie)
         
         let przeciwnikSekwencja = SKAction.sequence([ruszPrzeciwnika, usunPrzeciwnika, stracZycieAkcja])
+        
+        if (obecnyStanGry == stanGry.wTrakcie) {
         przeciwnik.runAction(przeciwnikSekwencja)
+        }
         
         let dx = punktKoncowy.x - punktStartowy.x
         let dy = punktKoncowy.y - punktStartowy.y
@@ -242,7 +265,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
   
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        if (obecnyStanGry == stanGry.wTrakcie) {
         wystrzelPocisk()
+        }
     }
     
     override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
@@ -250,18 +275,52 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let punktDotkniecia = dotkniecie.locationInNode(self)
             let poprzedniPunktDotkniecia = dotkniecie.previousLocationInNode(self)
             let ilePrzesunieto = punktDotkniecia.x - poprzedniPunktDotkniecia.x
+            
+            if obecnyStanGry == stanGry.wTrakcie {
             gracz.position.x += ilePrzesunieto
-            
-            if gracz.position.x > CGRectGetMaxX(plansza) - gracz.size.width/2 {
-                gracz.position.x = CGRectGetMaxX(plansza) - gracz.size.width/2
             }
             
-            if gracz.position.x < CGRectGetMinX(plansza) + gracz.size.width/2 {
-                gracz.position.x = CGRectGetMinX(plansza) + gracz.size.width/2
+            if gracz.position.x > CGRectGetMaxX(plansza) - gracz.size.width / 2 {
+                gracz.position.x = CGRectGetMaxX(plansza) - gracz.size.width / 2
             }
+            
+            if gracz.position.x < CGRectGetMinX(plansza) + gracz.size.width / 2 {
+                gracz.position.x = CGRectGetMinX(plansza) + gracz.size.width / 2 
+            }
+        }
+    }
+    
+    func koniecGry() {
+        obecnyStanGry = stanGry.poGrze
+       self.removeAllActions()
+        self.enumerateChildNodesWithName("Pocisk") {
+            pocisk, stop in
+            
+            pocisk.removeAllActions()
+        }
+        
+        self.enumerateChildNodesWithName("Przeciwnik") {
+            przeciwnik, stop in
+            przeciwnik.removeAllActions()
+        }
+        
+        let zmianaScenyAkcja = SKAction.runBlock(zmienScene)
+        let czekajNaZmiane = SKAction.waitForDuration(1)
+        let zmienSekwencjeSceny = SKAction.sequence([czekajNaZmiane, zmianaScenyAkcja])
+        self.runAction(zmienSekwencjeSceny)
             
             
         }
+    
+    func zmienScene() {
+        let scenaDoZmiany = KoniecGryScena(size: self.size)
+        scenaDoZmiany.scaleMode = self.scaleMode
+        let przejscie = SKTransition.fadeWithDuration(0.5)
+        self.view!.presentScene(scenaDoZmiany, transition: przejscie)
+        
     }
+    
+    }
+    
 
-}
+

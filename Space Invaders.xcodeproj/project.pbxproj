@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8E907B4C20CE88D5000EDE36 /* KoniecGryScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E907B4B20CE88D5000EDE36 /* KoniecGryScene.swift */; };
 		8E9B1F4C20CC23DD000C1430 /* Laser Blaster-SoundBible.com-1388608841.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 8E9B1F4B20CC23DD000C1430 /* Laser Blaster-SoundBible.com-1388608841.mp3 */; };
 		8EB9498E20CC0E5700DEDA7B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EB9498D20CC0E5700DEDA7B /* AppDelegate.swift */; };
 		8EB9499020CC0E5700DEDA7B /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 8EB9498F20CC0E5700DEDA7B /* GameScene.sks */; };
@@ -39,6 +40,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8E907B4B20CE88D5000EDE36 /* KoniecGryScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KoniecGryScene.swift; sourceTree = "<group>"; };
 		8E9B1F4B20CC23DD000C1430 /* Laser Blaster-SoundBible.com-1388608841.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Laser Blaster-SoundBible.com-1388608841.mp3"; sourceTree = "<group>"; };
 		8EB9498A20CC0E5700DEDA7B /* Space Invaders.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Space Invaders.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8EB9498D20CC0E5700DEDA7B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -110,6 +112,7 @@
 				8EB9498D20CC0E5700DEDA7B /* AppDelegate.swift */,
 				8EB9498F20CC0E5700DEDA7B /* GameScene.sks */,
 				8EB9499120CC0E5700DEDA7B /* GameScene.swift */,
+				8E907B4B20CE88D5000EDE36 /* KoniecGryScene.swift */,
 				8EE6C0D420CD57DB0098B0F2 /* Bomb Explosion 1-SoundBible.com-980698079.wav */,
 				8EBC8C7820CDA4E300786683 /* theBoldFont.ttf */,
 				8E9B1F4B20CC23DD000C1430 /* Laser Blaster-SoundBible.com-1388608841.mp3 */,
@@ -275,6 +278,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E907B4C20CE88D5000EDE36 /* KoniecGryScene.swift in Sources */,
 				8EB9499220CC0E5700DEDA7B /* GameScene.swift in Sources */,
 				8EB9499420CC0E5700DEDA7B /* GameViewController.swift in Sources */,
 				8EB9498E20CC0E5700DEDA7B /* AppDelegate.swift in Sources */,
